@@ -33,6 +33,12 @@ This project was built using the following framework versions:
 
 ![Class Diagram](./uml/Class%20Diagram.png)
 
+### Launch Ganache:
+
+```
+ganache-cli -m "spirit supply whale amount human item harsh scare congress discover talent hamster"
+```
+
 ## Run the application
 
 [TODO]

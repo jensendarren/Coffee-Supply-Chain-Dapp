@@ -1,10 +1,9 @@
 pragma solidity >=0.4.24;
 
-import '../coffeecore/Ownable.sol';
 import '../coffeeaccesscontrol/FarmerRole.sol';
 
 // Define a contract 'Supplychain'
-contract SupplyChain {
+contract SupplyChain is FarmerRole {
 
   // Define 'owner'
   address owner;
@@ -33,7 +32,7 @@ contract SupplyChain {
     Shipped,    // 5
     Received,   // 6
     Purchased   // 7
-    }
+  }
 
   State constant defaultState = State.Harvested;
 
@@ -100,7 +99,7 @@ contract SupplyChain {
 
   // Define a modifier that checks if an item.state of a upc is Harvested
   modifier harvested(uint _upc) {
-    require(items[_upc].itemState == State.Harvested);
+    require(items[_upc].itemState == State.Harvested, "Item state must be harvested");
     _;
   }
 
@@ -175,16 +174,12 @@ contract SupplyChain {
   }
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
-  function processItem(uint _upc) public
-  // Call modifier to check if upc has passed previous supply chain stage
-
-  // Call modifier to verify caller of this function
-
-  {
+  function processItem(uint _upc) public harvested(_upc) onlyFarmer {
     // Update the appropriate fields
+    items[_upc].itemState = State.Processed;
 
     // Emit the appropriate event
-
+    emit Processed(_upc);
   }
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
@@ -316,7 +311,7 @@ contract SupplyChain {
   )
   {
     // Assign values to the 9 parameters
-
+    itemState = uint(items[_upc].itemState);
 
   return
   (
