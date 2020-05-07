@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24;
 
 /**
  * @title Roles
@@ -14,7 +14,7 @@ library Roles {
    */
   function add(Role storage role, address account) internal {
     require(account != address(0));
-    require(!has(role, account));
+    require(!has(role, account), "Account already belongs to this role");
 
     role.bearer[account] = true;
   }

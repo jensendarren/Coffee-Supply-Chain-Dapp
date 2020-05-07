@@ -1,8 +1,10 @@
-pragma solidity ^0.4.24;
-// Define a contract 'Supplychain'
-contract SupplyChain is FarmerRole ....etc {
+pragma solidity >=0.4.24;
 
-  //https://knowledge.udacity.com/questions/128111
+import '../coffeecore/Ownable.sol';
+import '../coffeeaccesscontrol/FarmerRole.sol';
+
+// Define a contract 'Supplychain'
+contract SupplyChain {
 
   // Define 'owner'
   address owner;
@@ -64,6 +66,11 @@ contract SupplyChain is FarmerRole ....etc {
   event Received(uint upc);
   event Purchased(uint upc);
 
+  // Function that allows you to convert an address into a payable address
+  function _make_payable(address x) internal pure returns (address payable) {
+      return address(uint160(x));
+  }
+
   // Define a modifer that checks to see if msg.sender == owner of the contract
   modifier onlyOwner() {
     require(msg.sender == owner);
@@ -87,7 +94,8 @@ contract SupplyChain is FarmerRole ....etc {
     _;
     uint _price = items[_upc].productPrice;
     uint amountToReturn = msg.value - _price;
-    items[_upc].consumerID.transfer(amountToReturn);
+    address payable consumerIDPayable = _make_payable(items[_upc].consumerID);
+    _make_payable(consumerIDPayable).transfer(amountToReturn);
   }
 
   // Define a modifier that checks if an item.state of a upc is Harvested
@@ -150,19 +158,20 @@ contract SupplyChain is FarmerRole ....etc {
   // Define a function 'kill' if required
   function kill() public {
     if (msg.sender == owner) {
-      selfdestruct(owner);
+      address payable ownerPayable = _make_payable(owner);
+      selfdestruct(ownerPayable);
     }
   }
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
-  function harvestItem(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes) public
+  function harvestItem(uint _upc, address _originFarmerID, string memory _originFarmName, string memory _originFarmInformation, string memory _originFarmLatitude, string memory _originFarmLongitude, string  memory _productNotes) public
   {
     // Add the new item as part of Harvest
 
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event
-
+    emit Harvested(_upc);
   }
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
@@ -267,44 +276,43 @@ contract SupplyChain is FarmerRole ....etc {
   // Define a function 'fetchItemBufferOne' that fetches the data
   function fetchItemBufferOne(uint _upc) public view returns
   (
-  uint    itemSKU,
-  uint    itemUPC,
-  address ownerID,
-  address originFarmerID,
-  string  originFarmName,
-  string  originFarmInformation,
-  string  originFarmLatitude,
-  string  originFarmLongitude
+    uint    itemSKU,
+    uint    itemUPC,
+    address ownerID,
+    address originFarmerID,
+    string memory originFarmName,
+    string memory  originFarmInformation,
+    string memory originFarmLatitude,
+    string memory originFarmLongitude
   )
   {
-  // Assign values to the 8 parameters
-
-
-  return
-  (
-  itemSKU,
-  itemUPC,
-  ownerID,
-  originFarmerID,
-  originFarmName,
-  originFarmInformation,
-  originFarmLatitude,
-  originFarmLongitude
-  );
+    // Assign values to the 8 parameters
+    itemSKU = 1;
+    return
+    (
+      itemSKU,
+      itemUPC,
+      ownerID,
+      originFarmerID,
+      originFarmName,
+      originFarmInformation,
+      originFarmLatitude,
+      originFarmLongitude
+    );
   }
 
   // Define a function 'fetchItemBufferTwo' that fetches the data
   function fetchItemBufferTwo(uint _upc) public view returns
   (
-  uint    itemSKU,
-  uint    itemUPC,
-  uint    productID,
-  string  productNotes,
-  uint    productPrice,
-  uint    itemState,
-  address distributorID,
-  address retailerID,
-  address consumerID
+    uint    itemSKU,
+    uint    itemUPC,
+    uint    productID,
+    string  memory productNotes,
+    uint    productPrice,
+    uint    itemState,
+    address distributorID,
+    address retailerID,
+    address consumerID
   )
   {
     // Assign values to the 9 parameters
@@ -312,15 +320,15 @@ contract SupplyChain is FarmerRole ....etc {
 
   return
   (
-  itemSKU,
-  itemUPC,
-  productID,
-  productNotes,
-  productPrice,
-  itemState,
-  distributorID,
-  retailerID,
-  consumerID
+    itemSKU,
+    itemUPC,
+    productID,
+    productNotes,
+    productPrice,
+    itemState,
+    distributorID,
+    retailerID,
+    consumerID
   );
   }
 }

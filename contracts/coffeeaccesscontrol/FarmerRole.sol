@@ -1,7 +1,9 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.24;
 
 // Import the library 'Roles'
 import "./Roles.sol";
+
+// The Farmer can harvest coffee beans, process coffee beans, pack coffee palettes, add coffee palettes, ship coffee palettes, and track authenticity.
 
 // Define a contract 'FarmerRole' to manage this role - add, remove, check
 contract FarmerRole {
@@ -21,7 +23,7 @@ contract FarmerRole {
 
   // Define a modifier that checks to see if msg.sender has the appropriate role
   modifier onlyFarmer() {
-    require(isFarmer(msg.sender));
+    require(isFarmer(msg.sender), "You must be a farmer to perform this transaction");
     _;
   }
 
