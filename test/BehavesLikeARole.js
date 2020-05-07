@@ -1,10 +1,9 @@
-const truffleAssert = require('truffle-assertions');
 
 var accounts;
 var owner;
 var newActor1;
 var newActor2;
-var externalAccount;
+var notAFarmerAccount;
 
 contract('Roles', (accs) => {
     accounts = accs;
@@ -15,7 +14,6 @@ contract('Roles', (accs) => {
     console.log("Role Contract Owner: accounts[0] ", accounts[0])
 });
 
-// Shared behaviour
 shouldBehaveLikeARole = (role) => {
   it('the contract owner is the role instance', async () => {
     let isRole = await this.instance['is' + role](owner)
@@ -55,36 +53,6 @@ shouldBehaveLikeARole = (role) => {
   })
 }
 
-const FarmerRole = artifacts.require('FarmerRole')
-const ConsumerRole = artifacts.require('ConsumerRole')
-const DistributorRole = artifacts.require('DistributorRole')
-const RetailerRole = artifacts.require('RetailerRole')
-
-// Test each role contract implementation
-describe('ConsumerRole', () => {
-  beforeEach(async () => {
-    this.instance = await ConsumerRole.deployed();
-  });
-  shouldBehaveLikeARole('Consumer');
-})
-
-describe('FarmerRole', () => {
-  beforeEach(async () => {
-    this.instance = await FarmerRole.deployed();
-  });
-  shouldBehaveLikeARole('Farmer');
-})
-
-describe('DistributorRole', () => {
-  beforeEach(async () => {
-    this.instance = await DistributorRole.deployed();
-  });
-  shouldBehaveLikeARole('Distributor');
-})
-
-describe('RetailerRole', () => {
-  beforeEach(async () => {
-    this.instance = await RetailerRole.deployed();
-  });
-  shouldBehaveLikeARole('Retailer');
-})
+module.exports = {
+  shouldBehaveLikeARole: shouldBehaveLikeARole
+};
