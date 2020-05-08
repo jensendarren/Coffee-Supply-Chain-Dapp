@@ -89,13 +89,12 @@ contract SupplyChain is FarmerRole, DistributorRole {
     _;
   }
 
-  // Define a modifier that checks the price and refunds the remaining balance
+  // Define a modifier that checks the price and refunds the remaining balance to the sender
   modifier checkValue(uint _upc) {
     _;
     uint _price = items[_upc].productPrice;
     uint amountToReturn = msg.value - _price;
-    address payable consumerIDPayable = _make_payable(items[_upc].consumerID);
-    _make_payable(consumerIDPayable).transfer(amountToReturn);
+    msg.sender.transfer(amountToReturn);
   }
 
   // Define a modifier that checks if an item.state of a upc is Harvested
@@ -220,13 +219,17 @@ contract SupplyChain is FarmerRole, DistributorRole {
   // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
   // Use the above defined modifiers to check if the item is available for sale, if the buyer has paid enough,
   // and any excess ether sent is refunded back to the buyer
-  function buyItem(uint _upc) forSale(_upc) paidEnough(items[_upc].productPrice) onlyDistributor public payable
+  function buyItem(uint _upc) forSale(_upc) paidEnough(items[_upc].productPrice) checkValue(_upc) onlyDistributor public payable
     // Call modifer to send any excess ether back to buyer
     {
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_upc].itemState = State.Sold;
+    items[_upc].distributorID = msg.sender;
 
     // Transfer money to farmer
+    uint price = items[_upc].productPrice;
+    address payable originFarmerIDPayable = _make_payable(items[_upc].originFarmerID);
+    originFarmerIDPayable.transfer(price);
 
     // emit the appropriate event
     emit Sold(_upc);

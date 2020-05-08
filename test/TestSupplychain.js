@@ -235,10 +235,19 @@ describe('SupplyChain Contract', () => {
         })
 
         it("Testing smart contract function buyItem() that allows a distributor to buy coffee", async() => {
+            let startFarmerBal = await web3.eth.getBalance(originFarmerID);
+            let startDistributorBal = await web3.eth.getBalance(distributorID);
+            // Call buyItem function on the supply chain
             let tx = await supplyChain.buyItem(upc, {from: distributorID, value: web3.utils.toWei("2", "ether")})
 
-            // assert the correct amount of ether was sent to the farmer
-            // assert the correct change was returned to the distributor
+            // Assert the correct amount of ether was sent to the farmer
+            let endFarmerBal = await web3.eth.getBalance(originFarmerID);
+            assert.equal(endFarmerBal - startFarmerBal, productPrice)
+            // Assert the correct change was returned to the distributor (less gas fees)
+            let gasPrice = await web3.eth.getGasPrice()
+            let txGasFee = (tx.receipt.gasUsed * gasPrice)
+            let endDistributorBal = await web3.eth.getBalance(distributorID)
+            assert.equal((startDistributorBal - endDistributorBal - txGasFee), productPrice)
 
             // assert that the ForSale event was emitted
             truffleAssert.eventEmitted(tx, 'Sold', (e) => {
@@ -254,6 +263,8 @@ describe('SupplyChain Contract', () => {
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
             assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Sold');
+            assert.equal(resultBufferTwo[6], distributorID, 'Error: Invalid Distributor ID');
+
         })
 
         it("should not be possible to buy an item if the state of that item is not forSale", async () => {
