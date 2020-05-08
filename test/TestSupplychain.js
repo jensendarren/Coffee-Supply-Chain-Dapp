@@ -264,7 +264,6 @@ describe('SupplyChain Contract', () => {
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
             assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Sold');
             assert.equal(resultBufferTwo[6], distributorID, 'Error: Invalid Distributor ID');
-
         })
 
         it("should not be possible to buy an item if the state of that item is not forSale", async () => {
@@ -276,24 +275,40 @@ describe('SupplyChain Contract', () => {
 
     })
 
-    // 6th Test
-    it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    // 6th Test (Shipping)
+    describe('shipItem()', () => {
+        it("should not be possible to ship the item if the caller is not a distributor", async () => {
+            await truffleAssert.reverts(
+                supplyChain.shipItem(upc, {from: originFarmerID}),
+                "You must be a distributor to perform this transaction"
+            )
+        })
 
-        // Declare and Initialize a variable for event
+        it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
+            let tx = await supplyChain.shipItem(upc, {from: distributorID});
 
+            // assert that the ForSale event was emitted
+            truffleAssert.eventEmitted(tx, 'Shipped', (e) => {
+                return e.upc = upc;
+            });
 
-        // Watch the emitted event Shipped()
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
+            let newItemState = 5 // Shipped
 
-        // Mark an item as Sold by calling function buyItem()
+            // Verify the result set returned inlclydes the processed item
+            assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
+            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+        })
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        it("should not be possible to ship an item if the state of that item is not sold", async () => {
+            await truffleAssert.reverts(
+                supplyChain.shipItem(upc),
+                "Item state must be sold"
+            )
+        })
     })
 
     // 7th Test
