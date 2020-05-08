@@ -67,13 +67,15 @@ describe('SupplyChain Contract', () => {
         supplyChain = await SupplyChain.deployed()
     })
 
-    // 1st Test
+    // 1st Test (Harvesting)
     it("Testing smart contract function harvestItem() that allows a farmer to harvest coffee", async() => {
         // Mark an item as Harvested by calling function harvestItem()
         let tx = await supplyChain.harvestItem(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes)
 
         // assert that the Harvested event was emitted
-        truffleAssert.eventEmitted(tx, 'Harvested');
+        truffleAssert.eventEmitted(tx, 'Harvested', (e) => {
+            return e.upc = upc;
+        });
 
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
@@ -81,18 +83,21 @@ describe('SupplyChain Contract', () => {
 
         // Verify the result set
         assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
-        // assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')
-        // assert.equal(resultBufferOne[2], originFarmerID, 'Error: Missing or Invalid ownerID')
-        // assert.equal(resultBufferOne[3], originFarmerID, 'Error: Missing or Invalid originFarmerID')
-        // assert.equal(resultBufferOne[4], originFarmName, 'Error: Missing or Invalid originFarmName')
-        // assert.equal(resultBufferOne[5], originFarmInformation, 'Error: Missing or Invalid originFarmInformation')
-        // assert.equal(resultBufferOne[6], originFarmLatitude, 'Error: Missing or Invalid originFarmLatitude')
-        // assert.equal(resultBufferOne[7], originFarmLongitude, 'Error: Missing or Invalid originFarmLongitude')
-        assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
-        // assert.equal(eventEmitted, true, 'Invalid event emitted')
+        assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')
+        assert.equal(resultBufferOne[2], ownerID, 'Error: Missing or Invalid ownerID')
+        assert.equal(resultBufferOne[3], originFarmerID, 'Error: Missing or Invalid originFarmerID')
+        assert.equal(resultBufferOne[4], originFarmName, 'Error: Missing or Invalid originFarmName')
+        assert.equal(resultBufferOne[5], originFarmInformation, 'Error: Missing or Invalid originFarmInformation')
+        assert.equal(resultBufferOne[6], originFarmLatitude, 'Error: Missing or Invalid originFarmLatitude')
+        assert.equal(resultBufferOne[7], originFarmLongitude, 'Error: Missing or Invalid originFarmLongitude')
+        assert.equal(resultBufferTwo[0], sku, 'Error: Invalid item SKU')
+        assert.equal(resultBufferTwo[1], upc, 'Error: Invalid item UPC')
+        assert.equal(resultBufferTwo[2], productID, 'Error: Invalid product ID')
+        assert.equal(resultBufferTwo[3], productNotes, 'Error: Invalid product nodes')
+        assert.equal(resultBufferTwo[5], itemState, 'Error: Invalid item state')
     })
 
-    // 2nd Test
+    // 2nd Test (Processing)
     describe('processItem()', () => {
         it("should not be possible to call the function if the caller is not a farmer", async () => {
             await truffleAssert.reverts(

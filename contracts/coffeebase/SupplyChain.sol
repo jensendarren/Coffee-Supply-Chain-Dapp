@@ -165,10 +165,25 @@ contract SupplyChain is FarmerRole {
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
   function harvestItem(uint _upc, address _originFarmerID, string memory _originFarmName, string memory _originFarmInformation, string memory _originFarmLatitude, string memory _originFarmLongitude, string  memory _productNotes) public
   {
+    // Create new Item using Struct
+    Item memory  item;
+    item.sku = sku;
+    item.upc = _upc;
+    item.ownerID = msg.sender;
+    item.originFarmerID = _originFarmerID;
+    item.originFarmName = _originFarmName;
+    item.originFarmInformation = _originFarmInformation;
+    item.originFarmLatitude = _originFarmLatitude;
+    item.originFarmLongitude = _originFarmLongitude;
+    item.productID = _upc + sku;
+    item.productNotes = _productNotes;
+
     // Add the new item as part of Harvest
+    items[_upc] = item;
 
     // Increment sku
     sku = sku + 1;
+
     // Emit the appropriate event
     emit Harvested(_upc);
   }
@@ -281,8 +296,17 @@ contract SupplyChain is FarmerRole {
     string memory originFarmLongitude
   )
   {
+
     // Assign values to the 8 parameters
-    itemSKU = 1;
+    itemSKU = items[_upc].sku;
+    itemUPC = items[_upc].upc;
+    ownerID = items[_upc].ownerID;
+    originFarmerID = items[_upc].originFarmerID;
+    originFarmName = items[_upc].originFarmName;
+    originFarmInformation = items[_upc].originFarmInformation;
+    originFarmLatitude = items[_upc].originFarmLatitude;
+    originFarmLongitude = items[_upc].originFarmLongitude;
+
     return
     (
       itemSKU,
@@ -310,8 +334,17 @@ contract SupplyChain is FarmerRole {
     address consumerID
   )
   {
+
     // Assign values to the 9 parameters
+    itemSKU = items[_upc].sku;
+    itemUPC = items[_upc].upc;
+    productID = items[_upc].productID;
+    productNotes = items[_upc].productNotes;
+    productPrice = items[_upc].productPrice;
     itemState = uint(items[_upc].itemState);
+    distributorID = items[_upc].distributorID;
+    retailerID = items[_upc].retailerID;
+    consumerID = items[_upc].consumerID;
 
   return
   (
