@@ -1,9 +1,10 @@
 pragma solidity >=0.4.24;
 
 import '../coffeeaccesscontrol/FarmerRole.sol';
+import '../coffeeaccesscontrol/DistributorRole.sol';
 
 // Define a contract 'Supplychain'
-contract SupplyChain is FarmerRole {
+contract SupplyChain is FarmerRole, DistributorRole {
 
   // Define 'owner'
   address owner;
@@ -84,7 +85,7 @@ contract SupplyChain is FarmerRole {
 
   // Define a modifier that checks if the paid amount is sufficient to cover the price
   modifier paidEnough(uint _price) {
-    require(msg.value >= _price);
+    require(msg.value >= _price, "Amount sent is less than the item price");
     _;
   }
 
@@ -105,19 +106,19 @@ contract SupplyChain is FarmerRole {
 
   // Define a modifier that checks if an item.state of a upc is Processed
   modifier processed(uint _upc) {
-
+    require(items[_upc].itemState == State.Processed, "Item state must be processed");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Packed
   modifier packed(uint _upc) {
-
+    require(items[_upc].itemState == State.Packed, "Item state must be packed");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is ForSale
   modifier forSale(uint _upc) {
-
+    require(items[_upc].itemState == State.ForSale, "Item state must be for sale");
     _;
   }
 
@@ -198,49 +199,37 @@ contract SupplyChain is FarmerRole {
   }
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-  function packItem(uint _upc) public
-  // Call modifier to check if upc has passed previous supply chain stage
-
-  // Call modifier to verify caller of this function
-
-  {
+  function packItem(uint _upc) processed(_upc) onlyFarmer public {
     // Update the appropriate fields
+    items[_upc].itemState = State.Packed;
 
     // Emit the appropriate event
-
+    emit Packed(_upc);
   }
 
   // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
-  function sellItem(uint _upc, uint _price) public
-  // Call modifier to check if upc has passed previous supply chain stage
-
-  // Call modifier to verify caller of this function
-
-  {
+  function sellItem(uint _upc, uint _price) packed(_upc) onlyFarmer public {
     // Update the appropriate fields
+    items[_upc].itemState = State.ForSale;
+    items[_upc].productPrice = _price;
 
     // Emit the appropriate event
-
+    emit ForSale(_upc);
   }
 
   // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
   // Use the above defined modifiers to check if the item is available for sale, if the buyer has paid enough,
   // and any excess ether sent is refunded back to the buyer
-  function buyItem(uint _upc) public payable
-    // Call modifier to check if upc has passed previous supply chain stage
-
-    // Call modifer to check if buyer has paid enough
-
+  function buyItem(uint _upc) forSale(_upc) paidEnough(items[_upc].productPrice) onlyDistributor public payable
     // Call modifer to send any excess ether back to buyer
-
     {
-
     // Update the appropriate fields - ownerID, distributorID, itemState
+    items[_upc].itemState = State.Sold;
 
     // Transfer money to farmer
 
     // emit the appropriate event
-
+    emit Sold(_upc);
   }
 
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
