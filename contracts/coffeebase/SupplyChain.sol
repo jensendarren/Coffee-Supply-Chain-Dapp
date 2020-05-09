@@ -2,9 +2,10 @@ pragma solidity >=0.4.24;
 
 import '../coffeeaccesscontrol/FarmerRole.sol';
 import '../coffeeaccesscontrol/DistributorRole.sol';
+import '../coffeeaccesscontrol/RetailerRole.sol';
 
 // Define a contract 'Supplychain'
-contract SupplyChain is FarmerRole, DistributorRole {
+contract SupplyChain is FarmerRole, DistributorRole, RetailerRole {
 
   // Define 'owner'
   address owner;
@@ -129,7 +130,7 @@ contract SupplyChain is FarmerRole, DistributorRole {
 
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
-
+    require(items[_upc].itemState == State.Shipped, "Item state must be shipped");
     _;
   }
 
@@ -248,15 +249,14 @@ contract SupplyChain is FarmerRole, DistributorRole {
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
-  function receiveItem(uint _upc) public
-    // Call modifier to check if upc has passed previous supply chain stage
-
-    // Access Control List enforced by calling Smart Contract / DApp
-    {
+  function receiveItem(uint _upc) shipped(_upc) onlyRetailer public {
     // Update the appropriate fields - ownerID, retailerID, itemState
+    items[_upc].ownerID = msg.sender;
+    items[_upc].retailerID = msg.sender;
+    items[_upc].itemState = State.Received;
 
     // Emit the appropriate event
-
+    emit Received(_upc);
   }
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'

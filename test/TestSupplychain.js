@@ -68,6 +68,7 @@ describe('SupplyChain Contract', () => {
         // Add the actors to the supply chain
         await supplyChain.addFarmer(originFarmerID)
         await supplyChain.addDistributor(distributorID)
+        await supplyChain.addRetailer(retailerID)
     })
 
     // 1st Test (Harvesting)
@@ -243,11 +244,13 @@ describe('SupplyChain Contract', () => {
             // Assert the correct amount of ether was sent to the farmer
             let endFarmerBal = await web3.eth.getBalance(originFarmerID);
             assert.equal(endFarmerBal - startFarmerBal, productPrice)
-            // Assert the correct change was returned to the distributor (less gas fees)
+
+
             let gasPrice = await web3.eth.getGasPrice()
-            let txGasFee = (tx.receipt.gasUsed * gasPrice)
+            let txGasFee = (tx.receipt.cumulativeGasUsed * gasPrice)
             let endDistributorBal = await web3.eth.getBalance(distributorID)
-            assert.equal((startDistributorBal - endDistributorBal - txGasFee), productPrice)
+            // Assert that the distributer final balance is less the product price and gas fee
+            assert.equal((startDistributorBal - productPrice - txGasFee), endDistributorBal)
 
             // assert that the ForSale event was emitted
             truffleAssert.eventEmitted(tx, 'Sold', (e) => {
@@ -312,23 +315,41 @@ describe('SupplyChain Contract', () => {
     })
 
     // 7th Test
-    it("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    describe('receiveItem()', () => {
+        it("should not be possible to receive the item if the caller is not a retailer", async () => {
+            await truffleAssert.reverts(
+                supplyChain.receiveItem(upc, {from: originFarmerID}),
+                "You must be a retailer to perform this transaction"
+            )
+        })
 
-        // Declare and Initialize a variable for event
+        it("Testing smart contract function receiveItem() that allows a retailer to mark coffee received", async() => {
+            let tx = await supplyChain.receiveItem(upc, {from: retailerID});
 
+            // assert that the ForSale event was emitted
+            truffleAssert.eventEmitted(tx, 'Received', (e) => {
+                return e.upc = upc;
+            });
 
-        // Watch the emitted event Received()
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
+            let newItemState = 6 // Received
 
-        // Mark an item as Sold by calling function buyItem()
+            // Verify the result set returned inlclydes the processed item
+            assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
+            assert.equal(resultBufferOne[2], retailerID, 'Error: Missing or Invalid ownerID')
+            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+            assert.equal(resultBufferTwo[7], retailerID, 'Error: Missing or Invalid retailerID');
+        })
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        it("should not be possible to receive an item if the state of that item is not shipped", async () => {
+            await truffleAssert.reverts(
+                supplyChain.receiveItem(upc),
+                "Item state must be shipped"
+            )
+        })
     })
 
     // 8th Test
