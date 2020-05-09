@@ -1,5 +1,7 @@
 # CoffeeChain: A Fair Trade Coffee Supply Chain Dapp
 
+[![Build Status](https://travis-ci.org/jensendarren/Coffee-Supply-Chain-Dapp.svg?branch=master)](https://travis-ci.org/jensendarren/Coffee-Supply-Chain-Dapp)
+
 ## A Fair Trade Coffee Supply Chain Dapp (CoffeeChain). Written using Solidity, web3.js and the Truffle Webpack Box
 
 This application is the third Project for the [Blockchain Nanodegree](https://www.udacity.com/course/blockchain-developer-nanodegree--nd1309) with __Udacity__. Enjoy and feel free to comment!
