@@ -26,6 +26,8 @@ The Supply Chain Contract Transaction Hash on Rinkeby Network is: **0x2898bb06f4
 
 ## UML Diagrams
 
+NOTE: The _Regulator_ role has not been included in the final solution and that some method names used in the diagrams may be slightly different in the code.
+
 ### Activity Diagram
 
 ![Activity Diagram](./uml/Activity%20Diagram.png)
@@ -42,11 +44,56 @@ The Supply Chain Contract Transaction Hash on Rinkeby Network is: **0x2898bb06f4
 
 ![Class Diagram](./uml/Class%20Diagram.png)
 
-
-
 ## Run the application
 
-[TODO]
+In order to run the application locally you will need to do the following:
+
+```
+npm install
+ganache-cli -m "spirit supply whale amount human item harsh scare congress discover talent hamster"
+npm run dev
+```
+
+## Client side app
+
+In order to test the client side application, its necessary to import the different actor roles into your MetaMask and to ensure that each actor role is added to the deployed contract.
+
+### Step 1: Import all actor accounts into your MetaMask
+
+Keep the first account (index 0) as the contract owner and make account 1 - 4 as the actors as follows:
+
+* 0x018C2daBef4904ECbd7118350A0c54DbeaE3549A - **Farmer Account**
+* 0xCe5144391B4aB80668965F2Cc4f2CC102380Ef0A - **Distributor Account**
+* 0x460c31107DD048e34971E57DA2F99f659Add4f02 - **Retailer Account**
+* 0xD37b7B8C62BE2fdDe8dAa9816483AeBDBd356088 - **Consumer Account**
+
+Use the private keys for each of these accounts to add to MetaMask. Optionally rename the accounts to help with testing as shown below:
+
+![MetaMask Import](/img/metamask-accounts.png)
+
+### Step 2: Associate each actor account to the deployed supply chain contract
+
+In your local `truffle console` terminal window run the following code to associate each actor account to the deployed supply chain contract:
+
+```js
+originFarmerID = accounts[1]
+distributorID = accounts[2]
+retailerID = accounts[3]
+consumerID = accounts[4]
+let supplyChain = await SupplyChain.deployed()
+await supplyChain.addFarmer(originFarmerID)
+await supplyChain.addDistributor(distributorID)
+await supplyChain.addRetailer(retailerID)
+await supplyChain.addConsumer(consumerID)
+```
+
+### Step 3: Test the client app in your local browser + MetaMask
+
+Now open the app and in MetaMask select the Farmer account. Now interact with the app, performing the transactions that a Farmer is allowed to perform. Notice that if you try to perform a transaction that a Farmer _cannot_ process there is a transaction error and the approriate message is shown in the log. In oder to process the entire flow of the supply chain you will need to switch wallet addresses to the different actor wallets that were imported in Step 1 above to complete the end to end journey through the entire supply chain.
+
+Note that the transaction history contains the events logged for adding the actors to the contract as well as any transactions you have just performed as shown below:
+
+![Transactions History](./img/tx-history.png)
 
 ### Issue Reporting
 
