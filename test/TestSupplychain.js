@@ -132,11 +132,11 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 1 // Processed
+            itemState = 1 // Processed
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Processed');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Processed');
         })
 
         it("should not be possible to process an item if the state of that item is not harvested", async () => {
@@ -168,11 +168,11 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 2 // Packed
+            itemState = 2 // Packed
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Packed');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Packed');
         })
 
         it("should not be possible to pack an item if the state of that item is not processed", async () => {
@@ -204,12 +204,12 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 3 // ForSale
+            itemState = 3 // ForSale
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
             assert.equal(resultBufferTwo[4], productPrice, 'Error: Invalid product price');
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to ForSale');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to ForSale');
         })
 
         it("should not be possible to pack an item if the state of that item is not packed", async () => {
@@ -261,11 +261,11 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 4 // Sold
+            itemState = 4 // Sold
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Sold');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Sold');
             assert.equal(resultBufferTwo[6], distributorID, 'Error: Invalid Distributor ID');
         })
 
@@ -299,11 +299,11 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 5 // Shipped
+            itemState = 5 // Shipped
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Shipped');
         })
 
         it("should not be possible to ship an item if the state of that item is not sold", async () => {
@@ -335,12 +335,12 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 6 // Received
+            itemState = 6 // Received
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
             assert.equal(resultBufferOne[2], retailerID, 'Error: Missing or Invalid ownerID')
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Shipped');
             assert.equal(resultBufferTwo[7], retailerID, 'Error: Missing or Invalid retailerID');
         })
 
@@ -373,12 +373,12 @@ describe('SupplyChain Contract', () => {
             const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
             const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-            let newItemState = 7 // Purchased
+            itemState = 7 // Purchased
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
             assert.equal(resultBufferOne[2], consumerID, 'Error: Missing or Invalid ownerID')
-            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+            assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Shipped');
             assert.equal(resultBufferTwo[8], consumerID, 'Error: Missing or Invalid consumerID');
         })
 
@@ -394,13 +394,32 @@ describe('SupplyChain Contract', () => {
         // 9th Test (fetchItemBufferOne)
         it("Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain", async() => {
             // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const buffer1 = await supplyChain.fetchItemBufferOne(upc)
             // Verify the result set:
+            assert.equal(sku, buffer1[0], 'Error: Invalid SKU')
+            assert.equal(upc, buffer1[1], 'Error: Invalid UPC')
+            assert.equal(consumerID, buffer1[2], 'Error: Invalid owner ID')
+            assert.equal(originFarmerID, buffer1[3], 'Error: Invalid origin farmer ID')
+            assert.equal(originFarmName, buffer1[4], 'Error: Invalid origin farmer name')
+            assert.equal(originFarmInformation, buffer1[5], 'Error: Invalid origin farmer information')
+            assert.equal(originFarmLatitude, buffer1[6], 'Error: Invalid origin farm latitude')
+            assert.equal(originFarmLongitude, buffer1[7], 'Error: Invalid origin farm longitude')
         })
 
         // 10th Test (fetchItemBufferTwo)
         it("Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain", async() => {
             // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const buffer2 = await supplyChain.fetchItemBufferTwo(upc)
             // Verify the result set:
+            assert.equal(upc, buffer2[1], 'Error: Invalid UPC')
+            assert.equal(sku, buffer2[0], 'Error: Invalid SKU')
+            assert.equal(productID, buffer2[2], 'Error: Invalid product ID')
+            assert.equal(productNotes, buffer2[3], 'Error: Invalid product nodes')
+            assert.equal(productPrice, buffer2[4], 'Error: Invalid product price')
+            assert.equal(itemState, buffer2[5], 'Error: Invalid item state')
+            assert.equal(distributorID, buffer2[6], 'Error: Invalid distributor ID')
+            assert.equal(retailerID, buffer2[7], 'Error: Invalid retailer ID')
+            assert.equal(consumerID, buffer2[8], 'Error: Invalid consumer ID')
         })
     })
 });
