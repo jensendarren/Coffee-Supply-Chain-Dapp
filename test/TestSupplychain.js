@@ -69,6 +69,7 @@ describe('SupplyChain Contract', () => {
         await supplyChain.addFarmer(originFarmerID)
         await supplyChain.addDistributor(distributorID)
         await supplyChain.addRetailer(retailerID)
+        await supplyChain.addConsumer(consumerID)
     })
 
     // 1st Test (Harvesting)
@@ -245,10 +246,9 @@ describe('SupplyChain Contract', () => {
             let endFarmerBal = await web3.eth.getBalance(originFarmerID);
             assert.equal(endFarmerBal - startFarmerBal, productPrice)
 
-
+            let endDistributorBal = await web3.eth.getBalance(distributorID)
             let gasPrice = await web3.eth.getGasPrice()
             let txGasFee = (tx.receipt.cumulativeGasUsed * gasPrice)
-            let endDistributorBal = await web3.eth.getBalance(distributorID)
             // Assert that the distributer final balance is less the product price and gas fee
             assert.equal((startDistributorBal - productPrice - txGasFee), endDistributorBal)
 
@@ -314,7 +314,7 @@ describe('SupplyChain Contract', () => {
         })
     })
 
-    // 7th Test
+    // 7th Test (Received)
     describe('receiveItem()', () => {
         it("should not be possible to receive the item if the caller is not a retailer", async () => {
             await truffleAssert.reverts(
@@ -352,45 +352,55 @@ describe('SupplyChain Contract', () => {
         })
     })
 
-    // 8th Test
-    it("Testing smart contract function purchaseItem() that allows a consumer to purchase coffee", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    // 8th Test (Purchased)
+    describe('purchaseItem()', () => {
+        it("should not be possible to purchase the item if the caller is not a consumer", async () => {
+            await truffleAssert.reverts(
+                supplyChain.purchaseItem(upc, {from: distributorID}),
+                "You must be a consumer to perform this transaction"
+            )
+        })
 
-        // Declare and Initialize a variable for event
+        it("Testing smart contract function purchaseItem() that allows a consumer to purchase coffee", async() => {
+            let tx = await supplyChain.purchaseItem(upc, {from: consumerID});
 
+            // assert that the ForSale event was emitted
+            truffleAssert.eventEmitted(tx, 'Purchased', (e) => {
+                return e.upc = upc;
+            });
 
-        // Watch the emitted event Purchased()
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
+            let newItemState = 7 // Purchased
 
-        // Mark an item as Sold by calling function buyItem()
+            // Verify the result set returned inlclydes the processed item
+            assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
+            assert.equal(resultBufferOne[2], consumerID, 'Error: Missing or Invalid ownerID')
+            assert.equal(resultBufferTwo[5], newItemState, 'ItemState has not been updated to Shipped');
+            assert.equal(resultBufferTwo[8], consumerID, 'Error: Missing or Invalid consumerID');
+        })
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        it("should not be possible to purchase an item if the state of that item is not received", async () => {
+            await truffleAssert.reverts(
+                supplyChain.purchaseItem(upc),
+                "Item state must be received"
+            )
+        })
     })
 
-    // 9th Test
-    it("Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    describe('fetchItemBuffer.... functions', () => {
+        // 9th Test (fetchItemBufferOne)
+        it("Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain", async() => {
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            // Verify the result set:
+        })
 
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set:
-
-    })
-
-    // 10th Test
-    it("Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain", async() => {
-        const supplyChain = await SupplyChain.deployed()
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set:
-
+        // 10th Test (fetchItemBufferTwo)
+        it("Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain", async() => {
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            // Verify the result set:
+        })
     })
 });
