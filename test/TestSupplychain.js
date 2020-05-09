@@ -238,7 +238,7 @@ describe('SupplyChain Contract', () => {
 
         it("Testing smart contract function buyItem() that allows a distributor to buy coffee", async() => {
             let startFarmerBal = await web3.eth.getBalance(originFarmerID);
-            let startDistributorBal = await web3.eth.getBalance(distributorID);
+            let startDistributorBal = BigInt(await web3.eth.getBalance(distributorID));
             // Call buyItem function on the supply chain
             let tx = await supplyChain.buyItem(upc, {from: distributorID, value: web3.utils.toWei("2", "ether")})
 
@@ -246,11 +246,19 @@ describe('SupplyChain Contract', () => {
             let endFarmerBal = await web3.eth.getBalance(originFarmerID);
             assert.equal(endFarmerBal - startFarmerBal, productPrice)
 
-            let endDistributorBal = await web3.eth.getBalance(distributorID)
+            let endDistributorBal = BigInt(await web3.eth.getBalance(distributorID))
             let gasPrice = await web3.eth.getGasPrice()
-            let txGasFee = (tx.receipt.cumulativeGasUsed * gasPrice)
+            let txGasFee = BigInt(tx.receipt.gasUsed * gasPrice)
+            let currentProductPrice = BigInt(productPrice)
+            // console.log("****** startDistributorBal", startDistributorBal)
+            // console.log("****** endDistributorBal", endDistributorBal)
+            // console.log("****** gasPrice", gasPrice)
+            // console.log("****** txGasFee", txGasFee)
+            // console.log("****** productPrice", productPrice)
+            // console.log('****** DIFF', startDistributorBal - endDistributorBal)
+            // console.log("****** tx", tx)
             // Assert that the distributer final balance is less the product price and gas fee
-            assert.equal((startDistributorBal - productPrice - txGasFee), endDistributorBal)
+            assert.equal((startDistributorBal - currentProductPrice - txGasFee), endDistributorBal)
 
             // assert that the ForSale event was emitted
             truffleAssert.eventEmitted(tx, 'Sold', (e) => {
