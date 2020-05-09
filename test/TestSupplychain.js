@@ -418,8 +418,7 @@ describe('SupplyChain Contract', () => {
             assert.equal(productNotes, buffer2[3], 'Error: Invalid product nodes')
             assert.equal(productPrice, buffer2[4], 'Error: Invalid product price')
             assert.equal(itemState, buffer2[5], 'Error: Invalid item state')
-            assert.equal(distributorID, buff
-                er2[6], 'Error: Invalid distributor ID')
+            assert.equal(distributorID, buffer2[6], 'Error: Invalid distributor ID')
             assert.equal(retailerID, buffer2[7], 'Error: Invalid retailer ID')
             assert.equal(consumerID, buffer2[8], 'Error: Invalid consumer ID')
         })

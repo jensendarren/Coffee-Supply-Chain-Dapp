@@ -9,11 +9,16 @@ This application is the third Project for the [Blockchain Nanodegree](https://ww
 This project was built using the following framework versions:
 
 * Truffle v5.1.14-nodeLTS.0 (core: 5.1.13)
-* OpenZeppelin (openzeppelin-solidity) v2.1.2
 * Solidity v0.5.16 (solc-js)
 * Node v12.14.1
 * Web3.js v1.2.1
 * Truffle Assertions v0.9.2
+
+## Supply Chain Contract Address on the Rinkeby Network
+
+The Supply Chain Contract Address on Rinkeby Network is: **0xB4a0131Bd169BAf980E39EcdaB9B77C23E1D2a5E** and can be viewed on the Rinkeby Etherscan website [here](https://rinkeby.etherscan.io/address/0xB4a0131Bd169BAf980E39EcdaB9B77C23E1D2a5E)
+
+The Supply Chain Contract Transaction Hash on Rinkeby Network is: **0x2898bb06f4cdec1218d3d2e2f802213f52d669469bef05c5a69b9163534ff34f** and can be viewed on the Rinkeby Etherscan website  [here](https://rinkeby.etherscan.io/tx/0x2898bb06f4cdec1218d3d2e2f802213f52d669469bef05c5a69b9163534ff34f)
 
 ## UML Diagrams
 
