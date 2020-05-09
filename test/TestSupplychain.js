@@ -265,6 +265,7 @@ describe('SupplyChain Contract', () => {
 
             // Verify the result set returned inlclydes the processed item
             assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU');
+            assert.equal(resultBufferOne[2], distributorID, 'Error: Invalid item owner ID');
             assert.equal(resultBufferTwo[5], itemState, 'ItemState has not been updated to Sold');
             assert.equal(resultBufferTwo[6], distributorID, 'Error: Invalid Distributor ID');
         })
@@ -417,9 +418,25 @@ describe('SupplyChain Contract', () => {
             assert.equal(productNotes, buffer2[3], 'Error: Invalid product nodes')
             assert.equal(productPrice, buffer2[4], 'Error: Invalid product price')
             assert.equal(itemState, buffer2[5], 'Error: Invalid item state')
-            assert.equal(distributorID, buffer2[6], 'Error: Invalid distributor ID')
+            assert.equal(distributorID, buff
+                er2[6], 'Error: Invalid distributor ID')
             assert.equal(retailerID, buffer2[7], 'Error: Invalid retailer ID')
             assert.equal(consumerID, buffer2[8], 'Error: Invalid consumer ID')
+        })
+    })
+    describe('supply chain contract ownership', () => {
+        it('should have an owner of ownerID', async () => {
+            let supplyChainOwnerId = await supplyChain.owner()
+            assert.equal(supplyChainOwnerId, ownerID, "Error: Supply chain ownership method owner() not maching owner ID")
+        })
+
+        it('should be possible to transfer ownership of the contract', async() => {
+            let tx = await supplyChain.transferOwnership(originFarmerID, {from: ownerID})
+            truffleAssert.eventEmitted(tx, 'TransferOwnership', (e) => {
+                return e.oldOwner == ownerID && e.newOwner == originFarmerID;
+            })
+            let supplyChainOwnerId = await supplyChain.owner()
+            assert.equal(supplyChainOwnerId, originFarmerID, "Error: Ownership was not transfered")
         })
     })
 });

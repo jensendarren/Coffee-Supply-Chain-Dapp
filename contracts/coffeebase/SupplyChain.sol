@@ -4,12 +4,10 @@ import '../coffeeaccesscontrol/FarmerRole.sol';
 import '../coffeeaccesscontrol/DistributorRole.sol';
 import '../coffeeaccesscontrol/RetailerRole.sol';
 import '../coffeeaccesscontrol/ConsumerRole.sol';
+import '../coffeecore/Ownable.sol';
 
 // Define a contract 'Supplychain'
-contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole {
-
-  // Define 'owner'
-  address owner;
+contract SupplyChain is Ownable, FarmerRole, DistributorRole, RetailerRole, ConsumerRole {
 
   // Define a variable called 'upc' for Universal Product Code (UPC)
   uint  upc;
@@ -71,12 +69,6 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   // Function that allows you to convert an address into a payable address
   function _make_payable(address x) internal pure returns (address payable) {
       return address(uint160(x));
-  }
-
-  // Define a modifer that checks to see if msg.sender == owner of the contract
-  modifier onlyOwner() {
-    require(msg.sender == owner);
-    _;
   }
 
   // Define a modifer that verifies the Caller
@@ -143,7 +135,7 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
 
   // Define a modifier that checks if an item.state of a upc is Purchased
   modifier purchased(uint _upc) {
-
+    require(items[_upc].itemState == State.Purchased, "Item state must be purchased");
     _;
   }
 
@@ -151,17 +143,14 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   // and set 'sku' to 1
   // and set 'upc' to 1
   constructor() public payable {
-    owner = msg.sender;
     sku = 1;
     upc = 1;
   }
 
   // Define a function 'kill' if required
-  function kill() public {
-    if (msg.sender == owner) {
-      address payable ownerPayable = _make_payable(owner);
-      selfdestruct(ownerPayable);
-    }
+  function kill() onlyOwner public {
+    address payable ownerPayable = _make_payable(owner());
+    selfdestruct(ownerPayable);
   }
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
@@ -226,6 +215,7 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
     {
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_upc].itemState = State.Sold;
+    items[_upc].ownerID = msg.sender;
     items[_upc].distributorID = msg.sender;
 
     // Transfer money to farmer
