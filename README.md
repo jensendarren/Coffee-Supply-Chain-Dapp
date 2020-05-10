@@ -51,6 +51,7 @@ NOTE: The _Regulator_ role has not been included in the final solution and that 
 In order to run the application locally you will need to do the following:
 
 ```
+touch .secret
 npm install
 ganache-cli -m "spirit supply whale amount human item harsh scare congress discover talent hamster"
 npm run dev
