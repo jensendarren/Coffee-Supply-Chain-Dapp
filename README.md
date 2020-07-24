@@ -4,7 +4,7 @@
 
 ## A Fair Trade Coffee Supply Chain Dapp (CoffeeChain). Written using Solidity, web3.js and the Truffle Webpack Box
 
-This application is the third Project for the [Blockchain Nanodegree](https://www.udacity.com/course/blockchain-developer-nanodegree--nd1309) with __Udacity__. Enjoy and feel free to comment!
+This is a Supply Chain Managment blockchain Dapp using Ethereum.
 
 ## Library versions used in the project.
 
